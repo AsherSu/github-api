@@ -508,6 +508,31 @@ public class GHRepositoryTest extends AbstractGitHubWireMockTest {
     }
 
     /**
+     * List contributors.
+     *
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
+    @Test
+    public void listContributorsAnon() throws IOException {
+        GHRepository r = gitHub.getOrganization("hub4j").getRepository("github-api");
+        int i = 0;
+        boolean kohsuke = false;
+
+        for (GHRepository.Contributor c : r.listContributors(true)) {
+            if (c.getType().equals("Anonymous")) {
+                assertThat(c.getContributions(), is(3));
+                kohsuke = true;
+            }
+            if (++i > 1) {
+                break;
+            }
+        }
+
+        assertThat(kohsuke, is(true));
+    }
+
+    /**
      * Gets the permission.
      *
      * @throws Exception
@@ -863,12 +888,9 @@ public class GHRepositoryTest extends AbstractGitHubWireMockTest {
 
     /**
      * Search repositories.
-     *
-     * @throws Exception
-     *             the exception
      */
     @Test
-    public void searchRepositories() throws Exception {
+    public void searchRepositories() {
         PagedSearchIterable<GHRepository> r = gitHub.searchRepositories()
                 .q("tetris")
                 .language("assembly")
@@ -883,12 +905,9 @@ public class GHRepositoryTest extends AbstractGitHubWireMockTest {
 
     /**
      * Search org for repositories.
-     *
-     * @throws Exception
-     *             the exception
      */
     @Test
-    public void searchOrgForRepositories() throws Exception {
+    public void searchOrgForRepositories() {
         PagedSearchIterable<GHRepository> r = gitHub.searchRepositories().org("hub4j-test-org").list();
         GHRepository u = r.iterator().next();
         assertThat(u.getOwnerName(), equalTo("hub4j-test-org"));
@@ -1312,12 +1331,9 @@ public class GHRepositoryTest extends AbstractGitHubWireMockTest {
 
     /**
      * List refs empty tags.
-     *
-     * @throws Exception
-     *             the exception
      */
     @Test
-    public void listRefsEmptyTags() throws Exception {
+    public void listRefsEmptyTags() {
         try {
             GHRepository repo = getTempRepository();
             repo.listRefs("tags").toList();
@@ -1758,7 +1774,7 @@ public class GHRepositoryTest extends AbstractGitHubWireMockTest {
     /**
      * Test searching for pull requests.
      *
-     * @throws IOException
+     * @throws Exception
      *             the exception
      */
     @Test
